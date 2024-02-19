@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<beans>
-    <bean id="/helloworld" class="test.servlet.HelloWorldBean" method="doGet"/>
-</beans>
+
+<components>
+    <component-scan base-package="test"/>
+</components>
