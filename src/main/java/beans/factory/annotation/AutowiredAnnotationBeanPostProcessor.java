@@ -10,6 +10,9 @@ import java.lang.reflect.Field;
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
     private AbstractBeanFactory beanFactory;
 
+    public AutowiredAnnotationBeanPostProcessor() {
+    }
+
     public AutowiredAnnotationBeanPostProcessor(AbstractBeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
