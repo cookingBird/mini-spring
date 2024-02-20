@@ -11,13 +11,6 @@ import java.lang.reflect.Field;
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
     private BeanFactory beanFactory;
 
-    public AutowiredAnnotationBeanPostProcessor() {
-    }
-
-    public AutowiredAnnotationBeanPostProcessor(BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-    }
-
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         Object result = bean;

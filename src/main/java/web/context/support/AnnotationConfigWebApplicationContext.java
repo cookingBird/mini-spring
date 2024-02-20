@@ -82,7 +82,14 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
                 String controllerName = packageName
                         + "."
                         + file.getName().replace(".class", "");
-                tempNames.add(controllerName);
+                try {
+                    Class<?> clz = Class.forName(controllerName);
+                    if (!clz.isInterface()) {
+                        tempNames.add(controllerName);
+                    }
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return tempNames;
@@ -127,7 +134,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
 
     @Override
     public void registerBeanPostProcessors(ConfigurableListableBeanFactory bf) {
-        this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor(bf));
+        this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
     }
 
     @Override

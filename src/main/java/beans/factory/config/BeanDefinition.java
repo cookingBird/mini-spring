@@ -6,7 +6,7 @@ public class BeanDefinition {
 
     private boolean lazyInit = true;
     private String[] dependsOn;
-    private ConstructorArgumentValues constructorArgumentValues;
+    private ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
     private PropertyValues propertyValues;
     private String initMethodName;
     private volatile Object beanClass;

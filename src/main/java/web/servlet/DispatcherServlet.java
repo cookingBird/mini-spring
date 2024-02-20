@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DispatcherServlet extends HttpServlet {
-    private List<String> urlMappingNames = new ArrayList<>();
-    private Map<String, Method> urlMappingMethod = new HashMap<>();
-    private Map<String, Object> urlMappingObjs = new HashMap<>();
+    public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
     private List<String> packageNames = new ArrayList<>();
     private List<String> controllerNames = new ArrayList<>();
     private Map<String, Object> controllerObjs = new HashMap<>();
@@ -45,19 +43,12 @@ public class DispatcherServlet extends HttpServlet {
         super.init(config);
         this.parentApplicationContext = (WebApplicationContext) this.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
         configLocation = config.getInitParameter("contextConfigLocation");
-        URL xmlPath = null;
-        try {
-            xmlPath = super.getServletContext().getResource(configLocation);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        this.packageNames = XmlScanComponentHelper.getNodeValue(new ClassPathXmlResource(xmlPath));
-        this.webApplicationContext = new AnnotationConfigWebApplicationContext(configLocation);
+        this.webApplicationContext = new AnnotationConfigWebApplicationContext(configLocation, this.parentApplicationContext);
         refresh();
     }
 
     private void refresh() {
-        this.initController();
+//        this.initController();
         this.initHandlerMapping(this.webApplicationContext);
         this.initHandlerAdapter(this.webApplicationContext);
     }
@@ -117,25 +108,6 @@ public class DispatcherServlet extends HttpServlet {
         return tempNames;
     }
 
-    private void initMapping() {
-
-        for (String controllerName : this.controllerNames) {
-            Object obj = this.controllerObjs.get(controllerName);
-            Class<?> clz = this.controllerClass.get(controllerName);
-            Method[] methods = clz.getDeclaredMethods();
-            if (methods != null) {
-                for (Method method : methods) {
-                    boolean isRequestMapping = method.isAnnotationPresent(RequestMapping.class);
-                    if (isRequestMapping) {
-                        String uri = method.getAnnotation(RequestMapping.class).value();
-                        this.urlMappingNames.add(uri);
-                        this.urlMappingObjs.put(uri, obj);
-                        this.urlMappingMethod.put(uri, method);
-                    }
-                }
-            }
-        }
-    }
 
     private void initHandlerMapping(WebApplicationContext webApplicationContext) {
         this.handlerMapping = new RequestMappingHandlerMapping(webApplicationContext);
@@ -146,27 +118,22 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request,HttpServletResponse response){
-
+    protected void service(HttpServletRequest request, HttpServletResponse response) {
+        request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webApplicationContext);
+        try {
+            doDispatch(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-//    @Override
-//    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        String sPath = request.getServletPath(); //获取请求的path
-//        System.out.println("+++++++++++++++++++++++++++++++doGet: " + sPath);
-//        if (!this.urlMappingNames.contains(sPath)) {
-//            return;
-//        }
-//
-//        Method method = this.urlMappingMethod.get(sPath); //获取bean类定义
-//        Object obj = this.urlMappingObjs.get(sPath);  //获取bean实例
-//        Object objResult = null;
-//        try {
-//            objResult = method.invoke(obj); //方法调用
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        //将方法返回值写入response
-//        response.getWriter().append(objResult.toString());
-//    }
+    protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HandlerMethod method = this.handlerMapping.getHandler(request);
+        if (method == null) {
+            return;
+        }
+        HandlerAdapter handlerAdapter = this.handlerAdapter;
+        handlerAdapter.handle(request, response, method);
+    }
+
 }

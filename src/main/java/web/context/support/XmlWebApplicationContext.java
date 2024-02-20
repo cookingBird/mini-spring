@@ -9,6 +9,11 @@ public class XmlWebApplicationContext extends ClasspathXmlApplicationContext imp
 
     private ServletContext servletContext;
 
+    public XmlWebApplicationContext(String fileName, ServletContext servletContext) {
+        super(fileName);
+        this.servletContext = servletContext;
+    }
+
     public XmlWebApplicationContext(String fileName) {
         super(fileName);
     }

@@ -62,6 +62,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     private Object doCreateBean(BeanDefinition bd) {
+
         Class<?> clz = null;
         Object obj = null;
         Constructor<?> con = null;
@@ -71,38 +72,48 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             e.printStackTrace();
         }
         ConstructorArgumentValues constructorArgumentValues = bd.getConstructorArgumentValues();
-        if (!constructorArgumentValues.isEmpty()) {
-            Class<?>[] paramTypes = new Class[constructorArgumentValues.getArgumentCount()];
-            Object[] paramValues = new Object[constructorArgumentValues.getArgumentCount()];
-            for (int i = 0; i < constructorArgumentValues.getArgumentCount(); i++) {
-                ConstructorArgumentValue constructorArgumentValue = constructorArgumentValues.getIndexedArgumentValue(i);
-                if ("String".equals(constructorArgumentValue.getType()) || "java.lang.String".equals(constructorArgumentValue.getType())) {
-                    paramTypes[i] = String.class;
-                    paramValues[i] = constructorArgumentValue.getValue();
-                } else if ("Integer".equals(constructorArgumentValue.getType()) || "java.lang.Integer".equals(constructorArgumentValue.getType())) {
-                    paramTypes[i] = Integer.class;
-                    paramValues[i] = Integer.valueOf((String) constructorArgumentValue.getValue());
-                } else if ("int".equals(constructorArgumentValue.getType())) {
-                    paramTypes[i] = int.class;
-                    paramValues[i] = Integer.valueOf((String) constructorArgumentValue.getValue()).intValue();
-                } else {
-                    paramTypes[i] = String.class;
-                    paramValues[i] = constructorArgumentValue.getValue();
+        if (constructorArgumentValues != null) {
+            if (!constructorArgumentValues.isEmpty()) {
+                Class<?>[] paramTypes = new Class[constructorArgumentValues.getArgumentCount()];
+                Object[] paramValues = new Object[constructorArgumentValues.getArgumentCount()];
+                for (int i = 0; i < constructorArgumentValues.getArgumentCount(); i++) {
+                    ConstructorArgumentValue constructorArgumentValue = constructorArgumentValues.getIndexedArgumentValue(i);
+                    if ("String".equals(constructorArgumentValue.getType()) || "java.lang.String".equals(constructorArgumentValue.getType())) {
+                        paramTypes[i] = String.class;
+                        paramValues[i] = constructorArgumentValue.getValue();
+                    } else if ("Integer".equals(constructorArgumentValue.getType()) || "java.lang.Integer".equals(constructorArgumentValue.getType())) {
+                        paramTypes[i] = Integer.class;
+                        paramValues[i] = Integer.valueOf((String) constructorArgumentValue.getValue());
+                    } else if ("int".equals(constructorArgumentValue.getType())) {
+                        paramTypes[i] = int.class;
+                        paramValues[i] = Integer.valueOf((String) constructorArgumentValue.getValue()).intValue();
+                    } else {
+                        paramTypes[i] = String.class;
+                        paramValues[i] = constructorArgumentValue.getValue();
+                    }
                 }
-            }
-            try {
-                con = clz.getConstructor(paramTypes);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-            try {
-                obj = con.newInstance(paramValues);
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
+                try {
+                    con = clz.getConstructor(paramTypes);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    obj = con.newInstance(paramValues);
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    obj = clz.newInstance();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             try {
@@ -113,57 +124,59 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 e.printStackTrace();
             }
         }
-        System.out.println(bd.getId() + " bean created. " + bd.getClassName() + " : " + obj.toString());
+        System.out.println(bd.getId() + " bean created. ");
         return obj;
     }
 
     private void handleProperties(BeanDefinition bd, Class<?> clz, Object obj) {
         System.out.println("handle properties for bean : " + bd.getId());
         PropertyValues propertyValues = bd.getPropertyValues();
-        if (!propertyValues.isEmpty()) {
-            for (int i = 0; i < propertyValues.size(); i++) {
-                PropertyValue propertyValue = propertyValues.getPropertyValueList().get(i);
-                String pType = propertyValue.getType();
-                String pName = propertyValue.getName();
-                Object pValue = propertyValue.getValue();
-                boolean isRef = propertyValue.isRef();
-                Class<?>[] paramTypes = new Class[1];
-                Object[] paramValues = new Object[1];
-                if (!isRef) {
-                    if ("String".equals(pType) || "java.lang.String".equals(pType)) {
-                        paramTypes[0] = String.class;
-                    } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
-                        paramTypes[0] = Integer.class;
-                    } else if ("int".equals(pType)) {
-                        paramTypes[0] = int.class;
-                    } else { // 默认为string
-                        paramTypes[0] = String.class;
+        if (propertyValues != null) {
+            if (!propertyValues.isEmpty()) {
+                for (int i = 0; i < propertyValues.size(); i++) {
+                    PropertyValue propertyValue = propertyValues.getPropertyValueList().get(i);
+                    String pType = propertyValue.getType();
+                    String pName = propertyValue.getName();
+                    Object pValue = propertyValue.getValue();
+                    boolean isRef = propertyValue.isRef();
+                    Class<?>[] paramTypes = new Class[1];
+                    Object[] paramValues = new Object[1];
+                    if (!isRef) {
+                        if ("String".equals(pType) || "java.lang.String".equals(pType)) {
+                            paramTypes[0] = String.class;
+                        } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
+                            paramTypes[0] = Integer.class;
+                        } else if ("int".equals(pType)) {
+                            paramTypes[0] = int.class;
+                        } else { // 默认为string
+                            paramTypes[0] = String.class;
+                        }
+                        paramValues[0] = pValue;
+                    } else {
+                        try {
+                            paramTypes[0] = Class.forName(pType);
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            paramValues[0] = getBean((String) pValue);
+                        } catch (BeansException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    paramValues[0] = pValue;
-                } else {
+                    String methodName = "set" + pName.substring(0, 1).toUpperCase()
+                            + pName.substring(1);
+                    Method method = null;
                     try {
-                        paramTypes[0] = Class.forName(pType);
-                    } catch (ClassNotFoundException e) {
+                        method = clz.getMethod(methodName, paramTypes);
+                        method.invoke(obj, paramValues);
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
-                    try {
-                        paramValues[0] = getBean((String) pValue);
-                    } catch (BeansException e) {
-                        e.printStackTrace();
-                    }
-                }
-                String methodName = "set" + pName.substring(0, 1).toUpperCase()
-                        + pName.substring(1);
-                Method method = null;
-                try {
-                    method = clz.getMethod(methodName, paramTypes);
-                    method.invoke(obj, paramValues);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
                 }
             }
         }

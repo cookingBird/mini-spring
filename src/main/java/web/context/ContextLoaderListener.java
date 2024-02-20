@@ -22,10 +22,10 @@ public class ContextLoaderListener implements ServletContextListener {
     private void initWebApplicationContext(ServletContext servletContext) {
         String contextLocation = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
         if (contextLocation != null) {
-            WebApplicationContext wac = new XmlWebApplicationContext(contextLocation);
-            wac.setServletContext(servletContext);
-            this.context = wac;
-            servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
+            this.context = new XmlWebApplicationContext(contextLocation, servletContext);
+            servletContext.setAttribute(
+                    WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
+                    this.context);
         }
     }
 
