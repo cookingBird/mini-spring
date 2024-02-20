@@ -4,9 +4,21 @@ import beans.BeansException;
 import beans.factory.config.BeanDefinition;
 import beans.factory.support.AbstractAutowireCapableBeanFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ConfigurableListableBeanFactory {
+    private ConfigurableListableBeanFactory parentBeanFactory;
+
+    public ConfigurableListableBeanFactory getParentBeanFactory() {
+        return parentBeanFactory;
+    }
+
+    public void setParentBeanFactory(ConfigurableListableBeanFactory parentBeanFactory) {
+        this.parentBeanFactory = parentBeanFactory;
+    }
 
     @Override
     public int getBeanDefinitionCount() {

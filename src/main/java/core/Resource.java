@@ -1,4 +1,4 @@
-package beans.factory.config;
+package core;
 
 import java.util.Iterator;
 

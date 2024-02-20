@@ -1,6 +1,6 @@
 package web.servlet;
 
-import beans.factory.config.Resource;
+import core.Resource;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;

@@ -2,6 +2,7 @@ package beans.factory.xml;
 
 import beans.factory.config.*;
 import beans.factory.support.AbstractBeanFactory;
+import core.Resource;
 import org.dom4j.Element;
 
 import java.util.ArrayList;

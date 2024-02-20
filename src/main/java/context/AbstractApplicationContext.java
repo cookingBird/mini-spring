@@ -1,10 +1,10 @@
 package context;
 
-import beans.factory.config.BeanPostProcessor;
 import beans.BeansException;
 import beans.factory.ConfigurableListableBeanFactory;
+import beans.factory.config.BeanPostProcessor;
 import beans.factory.event.ApplicationEvent;
-import beans.factory.event.ApplicationListener;
+import beans.factory.event.ApplicationEventPublisher;
 import core.env.Environment;
 
 import java.util.ArrayList;
@@ -18,6 +18,8 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     private long startupDate;
     private final AtomicBoolean active = new AtomicBoolean();
     private final AtomicBoolean closed = new AtomicBoolean();
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public Object getBean(String beanName) throws BeansException {
@@ -171,24 +173,30 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         finishRefresh();
     }
 
+    public ApplicationEventPublisher getApplicationEventPublisher() {
+        return applicationEventPublisher;
+    }
+
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
     @Override
     abstract public ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
-    @Override
-    abstract public void publishEvent(ApplicationEvent event);
-
-    @Override
-    abstract public void addApplicationListener(ApplicationListener listener);
+    protected abstract void initApplicationEventPublisher();
 
     public abstract void registerListeners();
+
+    @Override
+    abstract public void publishEvent(ApplicationEvent event);
 
     public abstract void registerBeanPostProcessors(ConfigurableListableBeanFactory bf);
 
     public abstract void postProcessBeanFactory(ConfigurableListableBeanFactory bf);
 
-    abstract void initApplicationEventPublisher();
 
-    abstract protected void onRefresh();
+    protected abstract void onRefresh();
 
-    abstract void finishRefresh();
+    protected abstract void finishRefresh();
 }

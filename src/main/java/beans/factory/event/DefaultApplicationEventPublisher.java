@@ -14,7 +14,7 @@ public class DefaultApplicationEventPublisher implements ApplicationEventPublish
     }
 
     @Override
-    public void addApplicationListener(ApplicationListener listener) {
+    public void addApplicationListener(ApplicationListener<?> listener) {
         this.listeners.add(listener);
     }
 

@@ -5,11 +5,11 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>applicationContext.xml</param-value>
     </context-param>
-<!--    <listener>-->
-<!--        <listener-class>-->
-<!--            com.example.web.context.ContextLoaderListener-->
-<!--        </listener-class>-->
-<!--    </listener>-->
+    <listener>
+        <listener-class>
+            com.example.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
     <servlet>
         <servlet-name>minisMVC</servlet-name>
         <servlet-class>com.example.web.servlet.DispatcherServlet</servlet-class>

@@ -1,6 +1,8 @@
 package web.servlet;
 
 import web.annotation.RequestMapping;
+import web.context.WebApplicationContext;
+import web.context.support.AnnotationConfigWebApplicationContext;
 import web.helper.XmlScanComponentHelper;
 
 import javax.servlet.ServletConfig;
@@ -29,29 +31,35 @@ public class DispatcherServlet extends HttpServlet {
     private Map<String, Object> controllerObjs = new HashMap<>();
     private Map<String, Class<?>> controllerClass = new HashMap<>();
 
+    private WebApplicationContext webApplicationContext;
+    private WebApplicationContext parentApplicationContext;
+
+    private HandlerMapping handlerMapping;
+    private HandlerAdapter handlerAdapter;
+
 
     private String configLocation;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        this.parentApplicationContext = (WebApplicationContext) this.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
         configLocation = config.getInitParameter("contextConfigLocation");
         URL xmlPath = null;
         try {
             xmlPath = super.getServletContext().getResource(configLocation);
-            System.out.println("________________________xmlPath: " + xmlPath);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        ClassPathXmlResource res = new ClassPathXmlResource(xmlPath);
-        XmlScanComponentHelper helper = new XmlScanComponentHelper();
-        packageNames = helper.getNodeValue(res);
+        this.packageNames = XmlScanComponentHelper.getNodeValue(new ClassPathXmlResource(xmlPath));
+        this.webApplicationContext = new AnnotationConfigWebApplicationContext(configLocation);
         refresh();
     }
 
     private void refresh() {
         this.initController();
-        this.initMapping();
+        this.initHandlerMapping(this.webApplicationContext);
+        this.initHandlerAdapter(this.webApplicationContext);
     }
 
     private void initController() {
@@ -129,23 +137,36 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String sPath = request.getServletPath(); //获取请求的path
-        System.out.println("+++++++++++++++++++++++++++++++doGet: " + sPath);
-        if (!this.urlMappingNames.contains(sPath)) {
-            return;
-        }
-
-        Method method = this.urlMappingMethod.get(sPath); //获取bean类定义
-        Object obj = this.urlMappingObjs.get(sPath);  //获取bean实例
-        Object objResult = null;
-        try {
-            objResult = method.invoke(obj); //方法调用
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //将方法返回值写入response
-        response.getWriter().append(objResult.toString());
+    private void initHandlerMapping(WebApplicationContext webApplicationContext) {
+        this.handlerMapping = new RequestMappingHandlerMapping(webApplicationContext);
     }
+
+    private void initHandlerAdapter(WebApplicationContext webApplicationContext) {
+        this.handlerAdapter = new RequestMappingHandlerAdapter(webApplicationContext);
+    }
+
+    @Override
+    protected void service(HttpServletRequest request,HttpServletResponse response){
+
+    }
+
+//    @Override
+//    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+//        String sPath = request.getServletPath(); //获取请求的path
+//        System.out.println("+++++++++++++++++++++++++++++++doGet: " + sPath);
+//        if (!this.urlMappingNames.contains(sPath)) {
+//            return;
+//        }
+//
+//        Method method = this.urlMappingMethod.get(sPath); //获取bean类定义
+//        Object obj = this.urlMappingObjs.get(sPath);  //获取bean实例
+//        Object objResult = null;
+//        try {
+//            objResult = method.invoke(obj); //方法调用
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        //将方法返回值写入response
+//        response.getWriter().append(objResult.toString());
+//    }
 }

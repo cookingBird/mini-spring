@@ -1,21 +1,25 @@
 package context;
 
-import beans.*;
+import beans.BeansException;
 import beans.factory.ConfigurableListableBeanFactory;
 import beans.factory.DefaultListableBeanFactory;
 import beans.factory.config.BeanDefinition;
 import beans.factory.config.BeanFactoryPostProcessor;
 import beans.factory.config.BeanPostProcessor;
-import beans.factory.config.Resource;
-import beans.factory.event.*;
+import beans.factory.event.ApplicationEvent;
+import beans.factory.event.ApplicationListener;
+import beans.factory.event.ContextRefreshEvent;
+import beans.factory.event.DefaultApplicationEventPublisher;
 import beans.factory.xml.XmlBeanDefinitionReader;
+import core.ClassPathXmlResource;
+import core.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClasspathXmlApplicationContext extends AbstractApplicationContext implements ApplicationContext {
     private DefaultListableBeanFactory beanFactory;
-    private DefaultApplicationEventPublisher applicationEventPublisher;
+
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors =
             new ArrayList<BeanFactoryPostProcessor>();
 
@@ -41,12 +45,12 @@ public class ClasspathXmlApplicationContext extends AbstractApplicationContext i
 
     @Override
     public void publishEvent(ApplicationEvent event) {
-        this.applicationEventPublisher.publishEvent(event);
+        this.getApplicationEventPublisher().publishEvent(event);
     }
 
     @Override
-    public void addApplicationListener(ApplicationListener listener) {
-        this.applicationEventPublisher.addApplicationListener(listener);
+    public void addApplicationListener(ApplicationListener<?> listener) {
+        this.getApplicationEventPublisher().addApplicationListener(listener);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class ClasspathXmlApplicationContext extends AbstractApplicationContext i
                 e.printStackTrace();
             }
             if (bean instanceof ApplicationListener) {
-                this.applicationEventPublisher.addApplicationListener((ApplicationListener) bean);
+                this.getApplicationEventPublisher().addApplicationListener((ApplicationListener) bean);
             }
         }
     }
@@ -129,10 +133,8 @@ public class ClasspathXmlApplicationContext extends AbstractApplicationContext i
 
 
     @Override
-    void initApplicationEventPublisher() {
-        if (this.applicationEventPublisher == null) {
-            this.applicationEventPublisher = new DefaultApplicationEventPublisher();
-        }
+    public void initApplicationEventPublisher() {
+        this.setApplicationEventPublisher(new DefaultApplicationEventPublisher());
     }
 
     @Override
@@ -141,7 +143,7 @@ public class ClasspathXmlApplicationContext extends AbstractApplicationContext i
     }
 
     @Override
-    void finishRefresh() {
+    protected void finishRefresh() {
         publishEvent(new ContextRefreshEvent(this));
     }
 
