@@ -1,5 +1,6 @@
 package web.bind;
 
+import beans.BeanWrapperImpl;
 import beans.factory.config.PropertyValues;
 import util.WebUtils;
 
@@ -46,5 +47,8 @@ public class WebDataBinder {
 
     protected void addBindValues(PropertyValues propertyValues, HttpServletRequest request) {
 
+    }
+    public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
+        getPropertyAccessor().registerCustomEditor(requiredType, propertyEditor);
     }
 }

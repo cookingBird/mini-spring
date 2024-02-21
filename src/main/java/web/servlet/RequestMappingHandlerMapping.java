@@ -1,6 +1,6 @@
 package web.servlet;
 
-import web.annotation.RequestMapping;
+import web.bind.annotation.RequestMapping;
 import web.context.WebApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;

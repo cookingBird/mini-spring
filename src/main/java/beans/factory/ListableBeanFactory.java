@@ -5,7 +5,7 @@ import beans.BeansException;
 import java.util.List;
 import java.util.Map;
 
-public interface ListableBeanFactory {
+public interface ListableBeanFactory extends BeanFactory {
     boolean containsBeanDefinition(String beanName);
 
     int getBeanDefinitionCount();

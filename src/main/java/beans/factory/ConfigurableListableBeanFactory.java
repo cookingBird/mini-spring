@@ -1,4 +1,4 @@
 package beans.factory;
 
-public interface ConfigurableListableBeanFactory extends ListableBeanFactory, ConfigurableBeanFactory, BeanFactory {
+public interface ConfigurableListableBeanFactory extends ListableBeanFactory, ConfigurableBeanFactory {
 }

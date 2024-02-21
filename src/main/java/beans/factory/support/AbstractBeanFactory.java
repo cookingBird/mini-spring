@@ -26,22 +26,21 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             singleton = this.earlySingletonObjects.get(beanName);
             if (singleton == null) {
                 BeanDefinition beanDefinition = beanDefinitions.get(beanName);
-                if (beanDefinition == null) {
-                    throw new BeansException("No beanDefinition. " + beanName);
-                }
-                singleton = this.createBean(beanDefinition);
-                this.registerBean(beanDefinition.getId(), singleton);
+                if (beanDefinition != null) {
+                    singleton = this.createBean(beanDefinition);
+                    this.registerBean(beanDefinition.getId(), singleton);
 
-                // bean postprocessor
-                // step 1: postProcessBeforeInitialization
-                this.applyBeanPostProcessorBeforeInitialization(singleton, beanName);
-                // step 2: init-method
-                if (beanDefinition.getInitMethodName() != null &&
-                        !beanDefinition.equals("")) {
-                    this.invokeInitMethod(beanDefinition, singleton);
+                    // bean postprocessor
+                    // step 1: postProcessBeforeInitialization
+                    this.applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                    // step 2: init-method
+                    if (beanDefinition.getInitMethodName() != null &&
+                            !beanDefinition.equals("")) {
+                        this.invokeInitMethod(beanDefinition, singleton);
+                    }
+                    // step 3: postProcessAfterInitialization
+                    this.applyBeanPostProcessorAfterInitialization(singleton, beanName);
                 }
-                // step 3: postProcessAfterInitialization
-                this.applyBeanPostProcessorAfterInitialization(singleton, beanName);
             }
         }
         return singleton;

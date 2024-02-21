@@ -25,8 +25,8 @@ public class XmlBeanDefinitionReader {
             PropertyValues PVS = new PropertyValues();
             List<String> refs = new ArrayList();
             for (Element e : propertyElements) {
-                String pType = e.attributeValue("type");
                 String pName = e.attributeValue("name");
+                String pType = e.attributeValue("type");
                 String pValue = e.attributeValue("value");
                 String pRef = e.attributeValue("ref");
                 String pV = "";
@@ -47,8 +47,8 @@ public class XmlBeanDefinitionReader {
             List<Element> argumentElements = element.elements("constructor-arg");
             ConstructorArgumentValues AVS = new ConstructorArgumentValues();
             for (Element e : argumentElements) {
-                String pType = e.attributeValue("type");
                 String pName = e.attributeValue("name");
+                String pType = e.attributeValue("type");
                 String pValue = e.attributeValue("value");
                 AVS.addArgumentValue(new ConstructorArgumentValue(pType, pName, pValue));
             }
