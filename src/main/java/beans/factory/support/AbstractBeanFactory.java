@@ -1,16 +1,19 @@
 package beans.factory.support;
 
-import beans.*;
+import beans.BeansException;
 import beans.factory.BeanFactory;
+import beans.factory.FactoryBean;
 import beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements BeanFactory, BeanDefinitionRegistry {
     private final Map<String, BeanDefinition> beanDefinitions = new ConcurrentHashMap<>();
     private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>();
     private final List<String> beanDefinitionNames = new ArrayList<>();
@@ -40,10 +43,28 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                     }
                     // step 3: postProcessAfterInitialization
                     this.applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                    this.removeSingleton(beanName);
+                    this.registerBean(beanName, singleton);
                 }
             }
         }
+        if (singleton instanceof FactoryBean) {
+            try {
+                return this.getObjectForBeanInstance(singleton, beanName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return singleton;
+    }
+
+    protected Object getObjectForBeanInstance(Object beanInstance, String beanName) throws Exception {
+        if (!(beanInstance instanceof FactoryBean)) {
+            return beanInstance;
+        }
+
+        FactoryBean<?> factoryBean = (FactoryBean<?>) beanInstance;
+        return getObjectFromFactoryBean(factoryBean, beanName);
     }
 
     private Object createBean(BeanDefinition beanDefinition) {
